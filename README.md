@@ -3,44 +3,6 @@ Self-Driving Car Engineer Nanodegree Program
 
 ---
 
-## Dependencies
-
-* cmake >= 3.5
- * All OSes: [click here for installation instructions](https://cmake.org/install/)
-* make >= 4.1(mac, linux), 3.81(Windows)
-  * Linux: make is installed by default on most Linux distros
-  * Mac: [install Xcode command line tools to get make](https://developer.apple.com/xcode/features/)
-  * Windows: [Click here for installation instructions](http://gnuwin32.sourceforge.net/packages/make.htm)
-* gcc/g++ >= 5.4
-  * Linux: gcc / g++ is installed by default on most Linux distros
-  * Mac: same deal as make - [install Xcode command line tools]((https://developer.apple.com/xcode/features/)
-  * Windows: recommend using [MinGW](http://www.mingw.org/)
-* [uWebSockets](https://github.com/uWebSockets/uWebSockets)
-  * Run either `install-mac.sh` or `install-ubuntu.sh`.
-  * If you install from source, checkout to commit `e94b6e1`, i.e.
-    ```
-    git clone https://github.com/uWebSockets/uWebSockets
-    cd uWebSockets
-    git checkout e94b6e1
-    ```
-    Some function signatures have changed in v0.14.x. See [this PR](https://github.com/udacity/CarND-MPC-Project/pull/3) for more details.
-
-* **Ipopt and CppAD:**
-
-This project needs to install Ipopt and CppAD. I use brew install both of them
-
-    brew install ipopt
-    brew install cppad
-
-MacOS I am using is High Sierra 10.13.1 (17B1003).
-
-
-## Basic Build Instructions
-
-1. Clone this repo.
-2. Make a build directory: `mkdir build && cd build`
-3. Compile: `cmake .. && make`
-4. Run it: `./mpc`.
 
 ## How Project Works
 
@@ -57,9 +19,9 @@ After get the data, the service will do some data transformation, calculate the 
     42["steer",{"mpc_x":[10.3043770180367,15.4600377650319,20.6106998671241,25.7600298427125,30.9133558683391,36.0732754356507,41.2390126837818,46.4078560527436,51.5768923169674],"mpc_y":[-0.093320795018423,0.100578280193056,0.461280788249331,0.885218672954205,1.29673096812346,1.65311892528547,1.94889733528375,2.21497357494321,2.49619537580771],"next_x":[0.0,2.5,5.0,7.5,10.0,12.5,15.0,17.5,20.0,22.5,25.0,27.5,30.0,32.5,35.0,37.5,40.0,42.5,45.0,47.5,50.0,52.5,55.0,57.5,60.0],"next_y":[-1.19531198307524,-1.12012433464043,-0.992012114314628,-0.818771468107446,-0.608198542028485,-0.36808948208735,-0.106240434293645,0.169552455343026,0.451493040813059,0.73178517610685,1.00263271521479,1.25623951212729,1.48480942083472,1.6805462953275,1.83565398959602,1.94233635763066,1.99279725342184,1.97924053095993,1.89387004423535,1.72888964723848,1.47650319395973,1.12891453838948,0.678327534518129,0.116946036336078,-0.56302610216628],"steering_angle":-0.0661150200976763,"throttle":0.445882655482734}]
 
 
-* Process and Calculate Cost
+* **Process and Calculate Cost**
 
-  In the main.cpp L156, which calls one method in MPC.cpp
+  In the **main.cpp** L156, which calls one method in MPC.cpp
 
       auto vars = mpc.Solve (state, coeffs);
 
@@ -115,8 +77,46 @@ After get the data, the service will do some data transformation, calculate the 
 
 The yellow is a polynomial fitted to waypoints and the green line represents the x and y coordinates of the MPC trajectory. In the local test run, we can see the speed is little above 50m/h.
 
-[![PID driving Video](https://youtu.be/dKI5EoLLmEc/0.jpg)](https://youtu.be/dKI5EoLLmEc)
+[![PID driving Video](https://img.youtube.com/vi/dKI5EoLLmEc/0.jpg)](https://youtu.be/dKI5EoLLmEc)
 
+## Dependencies
+
+* cmake >= 3.5
+ * All OSes: [click here for installation instructions](https://cmake.org/install/)
+* make >= 4.1(mac, linux), 3.81(Windows)
+  * Linux: make is installed by default on most Linux distros
+  * Mac: [install Xcode command line tools to get make](https://developer.apple.com/xcode/features/)
+  * Windows: [Click here for installation instructions](http://gnuwin32.sourceforge.net/packages/make.htm)
+* gcc/g++ >= 5.4
+  * Linux: gcc / g++ is installed by default on most Linux distros
+  * Mac: same deal as make - [install Xcode command line tools]((https://developer.apple.com/xcode/features/)
+  * Windows: recommend using [MinGW](http://www.mingw.org/)
+* [uWebSockets](https://github.com/uWebSockets/uWebSockets)
+  * Run either `install-mac.sh` or `install-ubuntu.sh`.
+  * If you install from source, checkout to commit `e94b6e1`, i.e.
+    ```
+    git clone https://github.com/uWebSockets/uWebSockets
+    cd uWebSockets
+    git checkout e94b6e1
+    ```
+    Some function signatures have changed in v0.14.x. See [this PR](https://github.com/udacity/CarND-MPC-Project/pull/3) for more details.
+
+* **Ipopt and CppAD:**
+
+This project needs to install Ipopt and CppAD. I use brew install both of them
+
+    brew install ipopt
+    brew install cppad
+
+MacOS I am using is High Sierra 10.13.1 (17B1003).
+
+
+## Basic Build Instructions
+
+1. Clone this repo.
+2. Make a build directory: `mkdir build && cd build`
+3. Compile: `cmake .. && make`
+4. Run it: `./mpc`.
 
 ## Call for IDE Profiles Pull Requests
 
