@@ -128,4 +128,4 @@ I use XCode to edit and debug. In the root of the project folder, run following 
 ## Others
 
 
-In this project, the algorithm use [![Ipopt::CppAD]](https://www.coin-or.org/CppAD/Doc/doxydoc/html/namespaceCppAD_1_1ipopt_a2b3f613ffa4b230d7c407d3c04c64dd4.html) to Solve a Nonlinear Programming Problem. And in the MPC.cpp use C++ operator overloading.
+In this project, the algorithm use [Ipopt::CppAD](https://www.coin-or.org/CppAD/Doc/doxydoc/html/namespaceCppAD_1_1ipopt_a2b3f613ffa4b230d7c407d3c04c64dd4.html) to Solve a Nonlinear Programming Problem. And in the MPC.cpp use C++ operator overloading.
