@@ -27,33 +27,34 @@ After get the data, the service will do some data transformation, calculate the 
 
   This Solve() method is the key of MPC project, which first calculate the cost (fg[0]) . For more details of the explanatin, please check Lession 19-9.
 
-      // `fg` a vector of the cost constraints, `vars` is a vector of variable values (state & actuators)
-      // NOTE: You'll probably go back and forth between this function and
-      // the Solver function below.
 
-      // cost is stored in first element of fg
-      fg[0] = 0;
+        // `fg` a vector of the cost constraints, `vars` is a vector of variable values (state & actuators)
+        // NOTE: You'll probably go back and forth between this function and
+        // the Solver function below.
+
+        // cost is stored in first element of fg
+        fg[0] = 0;
 
 
-      // The part of the cost based on reference state
-      for (int t = 0; t < N; ++t) {
-          fg[0] += 200 * CppAD::pow(vars[cte_start + t] - ref_cte, 2);
-          fg[0] += 200 * CppAD::pow(vars[epsi_start + t] - ref_epsi, 2);
-          fg[0] += CppAD::pow(vars[v_start + t] - ref_v, 2);
-      }
+        // The part of the cost based on reference state
+        for (int t = 0; t < N; ++t) {
+            fg[0] += 200 * CppAD::pow(vars[cte_start + t] - ref_cte, 2);
+            fg[0] += 200 * CppAD::pow(vars[epsi_start + t] - ref_epsi, 2);
+            fg[0] += CppAD::pow(vars[v_start + t] - ref_v, 2);
+        }
 
-      // Minimize the use of actuators
-      for (int t = 0; t < N - 1; ++t) {
-          fg[0] += 80000 * CppAD::pow(vars[delta_start + t], 2);
-          fg[0] += 500 * CppAD::pow(vars[a_start + t], 2);
-      }
+        // Minimize the use of actuators
+        for (int t = 0; t < N - 1; ++t) {
+            fg[0] += 80000 * CppAD::pow(vars[delta_start + t], 2);
+            fg[0] += 500 * CppAD::pow(vars[a_start + t], 2);
+        }
 
-      //Minimize the value gap between sequential actuations
+        //Minimize the value gap between sequential actuations
 
-      for (int t = 0; t < N - 2; ++t) {
-          fg[0] += 200 * CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2);
-          fg[0] += 10 * CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
-      }
+        for (int t = 0; t < N - 2; ++t) {
+            fg[0] += 200 * CppAD::pow(vars[delta_start + t + 1] - vars[delta_start + t], 2);
+            fg[0] += 10 * CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
+        }
 
     Note some parameters used on the CppAD::pow(). Multiplying that CppAD::pow() by a value > 1 will influence the solver into keeping sequential steering values closer together. empirically the value we used above can finish the loop successfully on 50m/h speed.
 
@@ -123,3 +124,8 @@ MacOS I am using is High Sierra 10.13.1 (17B1003).
 I use XCode to edit and debug. In the root of the project folder, run following command:
 
     cmake -G "Xcode" .
+
+## Others
+
+
+In this project, the algorithm use [![Ipopt::CppAD]](https://www.coin-or.org/CppAD/Doc/doxydoc/html/namespaceCppAD_1_1ipopt_a2b3f613ffa4b230d7c407d3c04c64dd4.html) to Solve a Nonlinear Programming Problem. And in the MPC.cpp use C++ operator overloading.
