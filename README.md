@@ -25,12 +25,10 @@ After get the data, the service will do some data transformation, calculate the 
 
       auto vars = mpc.Solve (state, coeffs);
 
-  This Solve() method is the key of MPC project, which first calculate the cost (fg[0]) . For more details of the explanatin, please check Lession 19-9.
+  This Solve() method is the key of MPC project, which first calculate the cost (fg[0]) . For more details of the explainatin, please check Lession 19-9.
 
 
         // `fg` a vector of the cost constraints, `vars` is a vector of variable values (state & actuators)
-        // NOTE: You'll probably go back and forth between this function and
-        // the Solver function below.
 
         // cost is stored in first element of fg
         fg[0] = 0;
@@ -56,23 +54,76 @@ After get the data, the service will do some data transformation, calculate the 
             fg[0] += 10 * CppAD::pow(vars[a_start + t + 1] - vars[a_start + t], 2);
         }
 
-    Note some parameters used on the CppAD::pow(). Multiplying that CppAD::pow() by a value > 1 will influence the solver into keeping sequential steering values closer together. empirically the value we used above can finish the loop successfully on 50m/h speed.
+    Note some parameters used on the CppAD::pow(). Multiplying that CppAD::pow() by a value > 1 will influence the solver into keeping sequential steering values closer together. Empirically the value we used above can finish the loop successfully on 50m/h speed.
 
-    Then process other constraints with formular provided in the class session. The key is to constraint x to zero to keep align with the reference line.
+    In general, we want the steering angle values to be smooth. If the vehicle is behaving erratically it's likely there will be spikes in the steering angle value graph and its one indication you should tune the cost function.
 
-          // Recall the equations for the model:
-      // x_[t+1] = x[t] + v[t] * cos(psi[t]) * dt
-      // y_[t+1] = y[t] + v[t] * sin(psi[t]) * dt
-      // psi_[t+1] = psi[t] + v[t] / Lf * delta[t] * dt
-      // v_[t+1] = v[t] + a[t] * dt
-      // cte[t+1] = f(x[t]) - y[t] + v[t] * sin(epsi[t]) * dt
-      // epsi[t+1] = psi[t] - psides[t] + v[t] * delta[t] / Lf * dt
-      fg[1 + x_start + t] = x1 - (x0 + v0 * CppAD::cos(psi0) * dt);
-      fg[1 + y_start + t] = y1 - (y0 + v0 * CppAD::sin(psi0) * dt);
-      fg[1 + psi_start + t] = psi1 - (psi0 + v0 * delta0 / Lf * dt);
-      fg[1 + v_start + t] = v1 - (v0 + a0 * dt);
-      fg[1 + cte_start + t] = cte1 - ((f0 - y0) + (v0 * CppAD::sin(epsi0) * dt));
-      fg[1 + epsi_start + t] = epsi1 - ((psi0 - psides0) + v0 * delta0 / Lf * dt);
+
+* **Rubic Requirements**
+
+**The Model:**
+
+The kinematic model discussed in the class room includes the vehicle's x and y coordinates, orientation angle (psi), and velocity, as well as the cross-track error and psi error (epsi). Actuator outputs are acceleration and delta (steering angle). The model combines the state and actuations from the previous timestep to calculate the state for the current timestep based on the equations below:
+
+     Recall the equations for the model:
+         x_[t+1] = x[t] + v[t] * cos(psi[t]) * dt
+         y_[t+1] = y[t] + v[t] * sin(psi[t]) * dt
+         psi_[t+1] = psi[t] + v[t] / Lf * delta[t] * dt
+         v_[t+1] = v[t] + a[t] * dt
+         cte[t+1] = f(x[t]) - y[t] + v[t] * sin(epsi[t]) * dt
+         epsi[t+1] = psi[t] - psides[t] + v[t] * delta[t] / Lf * dt
+
+
+Note: Equations are from the lessons.
+
+
+**Timestep Length and Elapsed Duration (N & dt):**
+
+The values chosen for N and dt are 10 and 0.1, respectively.  This is defined in MPC.cpp file line 9-10.
+
+        size_t N = 10;
+        double dt = 0.1;
+
+This was the suggestion of Udacity's provided office hours for the project, and with the test run in local simulator, these values can help me finish the circle with good speed . These values mean that the optimizer is considering a one-second duration in which to determine a corrective trajectory. Adjusting either N or dt (even by small amounts) often produced erratic behavior.
+
+** Polynomial Fitting and MPC Preprocessing: **
+
+The waypoints are preprocessed by transforming them to the vehicle's perspective.
+
+        // start by transforming the points to be in car's co-ordinate system
+        // shift car reference angle to 90 degrees
+        for (int i=0;i < ptsx .size(); i++)
+        {
+            double shift_x = ptsx[i] - px;
+            double shift_y = ptsy[i] - py;
+
+            ptsx[i] = (shift_x * cos (0-psi) - shift_y * sin (0 - psi));
+            ptsy[i] = (shift_x * sin (0-psi) + shift_y * cos (0 - psi));
+        }
+
+This simplifies the process to fit a polynomial to the waypoints because the vehicle's x and y coordinates are now at the origin (0, 0) and the orientation angle is also zero.
+
+
+Next we have to find the coefficients for fitting the polynomial.
+
+
+      //We have to makesure we pass vectors as Eigen vectors topolyfit
+      double* ptrx = &ptsx[0];
+      Eigen::Map<Eigen::VectorXd> ptsx_transform(ptrx, 6);
+
+      double* ptry = &ptsy[0];
+      Eigen::Map<Eigen::VectorXd> ptsy_transform(ptry, 6);
+
+      //then we do the polyfit. polyfit defined in main.cpp line 47-66
+      auto coeffs = polyfit (ptsx_transform, ptsy_transform, 3 );
+
+
+** Model Predictive Control with Latency: **
+
+A contributing factor to latency is actuator dynamics. For example the time elapsed between when you command a steering angle to when that angle is actually achieved. This could easily be modeled by a simple dynamic system and incorporated into the vehicle model. One approach would be running a simulation using the vehicle model starting from the current state for the duration of the latency. The resulting state from the simulation is the new initial state for MPC.Thus, MPC can deal with latency much more effectively, by explicitly taking it into account, than a PID controller.
+
+The approach to dealing with latency was twofold: the original kinematic equations depend upon the actuations from the previous timestep, but with a delay of xxms (which happens to be the timestep interval) the actuations are applied another timestep later. Thus the optimal trajectory is computed starting from the time after the latency period. This has the advantage that the dynamics during the latency period is still calculated according to the vehicle model.
+
 
 ## Run and Test
 
